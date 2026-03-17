@@ -1,0 +1,114 @@
+mutation SeedData @transaction @auth(level: USER, insecureReason: "Seed data is for development purposes only and can be created by any logged-in user.") {
+  user_insertMany(data: [
+    {
+      id: "550e8400-e29b-41d4-a716-446655440000",
+      displayName: "Alice Smith",
+      email: "alice.smith@example.com",
+      createdAt: "2023-01-15T10:00:00Z",
+      companyName: "Alice's Awesome Company",
+      industry: "Tech",
+    },
+    {
+      id: "550e8400-e29b-41d4-a716-446655440001",
+      displayName: "Bob Johnson",
+      email: "bob.johnson@example.com",
+      createdAt: "2023-02-20T11:30:00Z",
+      companyName: "Bob's Brilliant Business",
+      industry: "Consulting",
+    }
+  ])
+  subscriptionType_insertMany(data: [
+    {
+      id: "550e8400-e29b-41d4-a716-446655440002",
+      name: "Basic",
+      price: 9.99,
+      features: ["Feature A", "Feature B"],
+      duration: "Monthly",
+      description: "A basic subscription plan."
+    },
+    {
+      id: "550e8400-e29b-41d4-a716-446655440003",
+      name: "Premium",
+      price: 29.99,
+      features: ["Feature A", "Feature B", "Feature C", "Feature D"],
+      duration: "Monthly",
+      description: "A premium subscription plan with advanced features."
+    }
+  ])
+  businessProfile_insertMany(data: [
+    {
+      id: "550e8400-e29b-41d4-a716-446655440004",
+      userId: "550e8400-e29b-41d4-a716-446655440000",
+      name: "Alice's Marketing Agency",
+      industry: "Marketing",
+      size: "Small",
+      createdAt: "2023-03-01T09:00:00Z",
+      description: "A marketing agency specializing in digital campaigns.",
+      goals: "Increase client acquisition by 20%"
+    },
+    {
+      id: "550e8400-e29b-41d4-a716-446655440005",
+      userId: "550e8400-e29b-41d4-a716-446655440001",
+      name: "Bob's Financial Advisory",
+      industry: "Finance",
+      size: "Medium",
+      createdAt: "2023-04-10T14:00:00Z",
+      description: "Financial advisory services for small to medium businesses.",
+      goals: "Expand investment portfolio for clients."
+    }
+  ])
+  consultation_insertMany(data: [
+    {
+      id: "550e8400-e29b-41d4-a716-446655440006",
+      userId: "550e8400-e29b-41d4-a716-446655440000",
+      businessProfileId: "550e8400-e29b-41d4-a716-446655440004",
+      question: "How can I improve my social media engagement?",
+      aiResponse: "Focus on creating engaging video content and interactive polls.",
+      createdAt: "2023-05-01T10:00:00Z",
+      sentimentAnalysis: "Positive"
+    },
+    {
+      id: "550e8400-e29b-41d4-a716-446655440007",
+      userId: "550e8400-e29b-41d4-a716-446655440001",
+      businessProfileId: "550e8400-e29b-41d4-a716-446655440005",
+      question: "What are the best investment strategies for small businesses?",
+      aiResponse: "Consider diversified portfolios with a mix of stocks and bonds.",
+      createdAt: "2023-06-05T13:00:00Z",
+      sentimentAnalysis: "Neutral"
+    }
+  ])
+  insight_insertMany(data: [
+    {
+      consultationId: "550e8400-e29b-41d4-a716-446655440006",
+      title: "Video Content Strategy",
+      description: "Develop a series of short-form video content for Instagram and TikTok.",
+      type: "Marketing",
+      actionableSteps: "Hire a videographer, plan content calendar.",
+      impactEstimate: "High"
+    },
+    {
+      consultationId: "550e8400-e29b-41d4-a716-446655440007",
+      title: "Diversified Investment Plan",
+      description: "Allocate funds across various asset classes to mitigate risk.",
+      type: "Financial",
+      actionableSteps: "Consult with a financial advisor, research market trends.",
+      impactEstimate: "Medium"
+    }
+  ])
+  article_insertMany(data: [
+    {
+      title: "The Future of AI in Business",
+      content: "Artificial intelligence is rapidly transforming various industries...",
+      category: "Technology",
+      keywords: "AI, Business, Innovation",
+      publishedAt: "2023-07-01T08:00:00Z"
+    },
+    {
+      title: "Marketing Strategies for Small Businesses",
+      content: "Effective marketing is crucial for small businesses to thrive...",
+      category: "Marketing",
+      keywords: "Marketing, Small Business, Strategy",
+      publishedAt: "2023-07-10T11:00:00Z"
+    }
+  ])
+}

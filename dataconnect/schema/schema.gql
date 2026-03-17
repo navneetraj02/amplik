@@ -1,0 +1,53 @@
+type User @table {
+  displayName: String!
+  email: String!
+  createdAt: Timestamp!
+  companyName: String
+  industry: String
+  subscriptionType: SubscriptionType
+}
+
+type BusinessProfile @table {
+  user: User!
+  name: String!
+  industry: String!
+  size: String!
+  createdAt: Timestamp!
+  description: String
+  goals: String
+}
+
+type Consultation @table {
+  user: User!
+  businessProfile: BusinessProfile
+  question: String!
+  aiResponse: String!
+  createdAt: Timestamp!
+  userFeedback: String
+  sentimentAnalysis: String
+}
+
+type Insight @table {
+  consultation: Consultation!
+  title: String!
+  description: String!
+  type: String!
+  actionableSteps: String
+  impactEstimate: String
+}
+
+type Article @table {
+  title: String!
+  content: String!
+  category: String!
+  keywords: String
+  publishedAt: Timestamp
+}
+
+type SubscriptionType @table {
+  name: String!
+  price: Float!
+  features: [String!]!
+  duration: String
+  description: String
+}
