@@ -84,8 +84,8 @@ function SidebarContent({
       {/* Header */}
       <div className="flex items-center justify-between px-5 h-16 border-b border-sidebar-border">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center">
-            <span className="font-display text-sm font-bold text-primary-foreground">AK</span>
+          <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center p-1.5 border border-border">
+            <img src="/logo.svg" alt="Amplik" className="w-full h-full object-contain" />
           </div>
           <span className="font-display font-semibold text-foreground text-[15px] tracking-tight">Amplik</span>
         </div>

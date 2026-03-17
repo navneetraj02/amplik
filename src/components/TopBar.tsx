@@ -25,8 +25,8 @@ export function TopBar({ sidebarCollapsed, onToggleSidebar }: TopBarProps) {
           )}
         </button>
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-          <h1 className="text-sm font-medium text-foreground">Amplik AI Consultant</h1>
+          <img src="/logo.svg" alt="Amplik Logo" className="w-5 h-5 object-contain" />
+          <h1 className="text-sm font-medium text-foreground">Amplik</h1>
         </div>
       </div>
     </header>

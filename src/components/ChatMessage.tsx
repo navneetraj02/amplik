@@ -26,7 +26,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
         {isUser ? (
           <User className="w-4 h-4 text-primary-foreground" />
         ) : (
-          <span className="font-display text-[10px] font-bold text-primary">SF</span>
+          <img src="/logo.svg" alt="Amplik AI" className="w-5 h-5 object-contain" />
         )}
       </div>
 

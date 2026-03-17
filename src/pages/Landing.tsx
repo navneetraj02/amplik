@@ -49,8 +49,8 @@ const Landing = () => {
         {/* Top bar / logo */}
         <header className="flex items-center justify-between px-6 py-4 sm:px-10">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-400/80 via-sky-500/80 to-violet-500/80 shadow-[0_0_24px_rgba(56,189,248,0.65)]">
-              <Sparkles className="h-4 w-4 text-slate-950" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary border border-border p-2 shadow-lg">
+              <img src="/logo.svg" alt="Amplik Logo" className="w-full h-full object-contain" />
             </div>
             <div className="flex flex-col">
               <span className="font-display text-sm font-semibold tracking-tight text-foreground">
@@ -170,8 +170,8 @@ const Landing = () => {
                 <CardContent className="relative space-y-4 p-5 sm:p-6">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800">
-                        <Sparkles className="h-4 w-4 text-cyan-300" />
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 p-1.5 border border-slate-700">
+                        <img src="/logo.svg" alt="AI Avatar" className="w-full h-full object-contain" />
                       </div>
                       <div className="flex flex-col">
                         <span className="text-xs font-medium text-foreground">Amplik AI Consultant</span>
@@ -353,8 +353,8 @@ const Landing = () => {
                   <CardContent className="space-y-4 p-5 sm:p-6">
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400/80 via-sky-500/80 to-violet-500/80">
-                          <Sparkles className="h-4 w-4 text-slate-950" />
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-800 p-2 border border-slate-700">
+                          <img src="/logo.svg" alt="Amplik AI" className="w-full h-full object-contain" />
                         </div>
                         <div className="flex flex-col">
                           <span className="text-xs font-medium text-foreground">Conversation-first workflow</span>
