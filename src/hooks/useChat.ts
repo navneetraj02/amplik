@@ -2,8 +2,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { Message, Conversation } from "@/types/chat";
 import { toast } from "sonner";
 import { db } from "@/lib/firebase";
-import { ref, push, set, get, onValue, serverTimestamp } from "firebase/database";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { ref, push, set, get, onValue } from "firebase/database";
 
 const SYSTEM_PROMPT = `You are an advanced AI Sales Consultant and Client Success Specialist representing the digital product studio Amplik.
 
@@ -575,54 +574,41 @@ export function useChat() {
           await set(ref(db, `users/${userId}/conversations/${activeConversationId}/title`), newTitle);
         }
 
-        // 4. Get AI response
-        console.log("DEBUG - Requesting Gemini response...");
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({
-          model: "gemini-2.5-flash",
-          systemInstruction: SYSTEM_PROMPT,
-        });
-
-        const rawHistory = (currentConv?.messages || []).map((m) => ({
-          role: m.role === "ai" ? "model" as const : "user" as const,
-          parts: [{ text: m.content }],
+        // 4. Get AI response via secure backend proxy
+        console.log("DEBUG - Requesting AI response from backend...");
+        const chatApiUrl = import.meta.env.VITE_CHAT_API_URL || "/api/chat";
+        
+        const history = (currentConv?.messages || []).map((m) => ({
+          role: m.role,
+          content: m.content,
         }));
 
-        // Gemini requires history to start with a 'user' message. 
-        // We skip the initial AI greeting if it's the first message.
-        let history = rawHistory;
-        while (history.length > 0 && history[0].role !== "user") {
-          history = history.slice(1);
+        const response = await fetch(chatApiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: [...history, { role: "user", content: content.trim() }],
+            systemInstruction: SYSTEM_PROMPT,
+          }),
+        });
+
+        if (!response.ok) {
+          const errData = await response.json();
+          throw new Error(errData.error || "Failed to get AI response");
         }
 
-        const chatSession = model.startChat({ history });
+        const data = await response.json();
+        const fullContent = data.text;
+        setIsTyping(false);
 
         const aiMsgId = `ai-${Date.now()}`;
-        // Add BOTH the user message and the temporary AI placeholder to UI
         setConversations(prev => prev.map(c => 
           c.id === activeConversationId 
-            ? { ...c, messages: [...c.messages, userMsg, { id: aiMsgId, role: "ai", content: "", timestamp: new Date() }] }
+            ? { ...c, messages: [...c.messages, userMsg, { id: aiMsgId, role: "ai", content: fullContent, timestamp: new Date() }] }
             : c
         ));
 
-        const resultInfo = await chatSession.sendMessageStream(content.trim());
-        setIsTyping(false);
-
-        let fullContent = "";
-        for await (const chunk of resultInfo.stream) {
-          const chunkText = chunk.text();
-          fullContent += chunkText;
-          // Update the localized temporary message content
-          setConversations((prev) =>
-            prev.map((c) =>
-              c.id === activeConversationId
-                ? { ...c, messages: c.messages.map((m) => m.id === aiMsgId ? { ...m, content: fullContent } : m) }
-                : c
-            )
-          );
-        }
-
-        console.log("DEBUG - Gemini response complete");
+        console.log("DEBUG - AI response complete");
 
         // 4. Save final AI message to Firebase
         if (fullContent) {
