@@ -54,6 +54,7 @@
     "firebase": "^12.10.0",
     "framer-motion": "^12.35.2",
     "googleapis": "^171.4.0",
+    "groq-sdk": "^1.1.1",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.462.0",
     "next-themes": "^0.3.0",

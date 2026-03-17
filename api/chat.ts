@@ -1,7 +1,11 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 
-const GEMINI_API_KEY = process.env.VITE_GEMINI_API_KEY || "";
+const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
+
+const groq = new Groq({
+  apiKey: GROQ_API_KEY,
+});
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Handle CORS
@@ -20,39 +24,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const { messages, systemInstruction } = req.body;
 
-    if (!GEMINI_API_KEY) {
-      return res.status(500).json({ error: "API Key not configured on server" });
+    if (!GROQ_API_KEY) {
+      return res.status(500).json({ error: "Groq API Key not configured on server" });
     }
 
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash", 
-      systemInstruction,
+    // Convert messages to Groq/OpenAI format
+    const chatMessages = [
+      { role: "system", content: systemInstruction },
+      ...messages.map((m: any) => ({
+        role: m.role === "ai" ? "assistant" : "user",
+        content: m.content,
+      })),
+    ];
+
+    const completion = await groq.chat.completions.create({
+      messages: chatMessages,
+      model: "llama-3.1-70b-versatile",
+      temperature: 0.7,
+      max_tokens: 1024,
+      top_p: 1,
+      stream: false,
     });
 
-    // Format history for Gemini
-    // Ensure history starts with user and alternates
-    let history = (messages || []).map((m: any) => ({
-      role: m.role === "ai" ? "model" : "user",
-      parts: [{ text: m.content }],
-    }));
-
-    // Remove last message as it's the current prompt
-    const lastMessage = history.pop();
-    const prompt = lastMessage?.parts[0].text || "";
-
-    // Strictly ensure history starts with 'user'
-    while (history.length > 0 && history[0].role !== "user") {
-      history.shift();
-    }
-
-    const chatSession = model.startChat({ history });
-    const result = await chatSession.sendMessage(prompt);
-    const responseText = result.response.text();
+    const responseText = completion.choices[0]?.message?.content || "";
 
     return res.status(200).json({ text: responseText });
   } catch (error: any) {
-    console.error("Chat API error:", error);
+    console.error("Groq API error:", error);
     return res.status(500).json({ error: error.message || "Internal server error" });
   }
 }
