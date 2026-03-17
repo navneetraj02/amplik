@@ -7,9 +7,26 @@ const REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN || "";
 const CALENDAR_ID = process.env.GOOGLE_CALENDAR_ID || "";
 const TEAM_EMAIL = process.env.TEAM_EMAIL || "";
 
-function buildDateTime(date: string, time: string, timeZone: string) {
-  const dateTimeString = `${date} ${time}`;
-  const d = new Date(`${dateTimeString} ${timeZone}`);
+function buildDateTime(datePath: string, timePath: string, _timeZone: string) {
+  // datePath is YYYY-MM-DD (from toISOString().slice(0,10))
+  // timePath is "9:00 AM" or "2:30 PM"
+  const [timeStr, ampm] = timePath.split(" ");
+  let [hours, minutes] = timeStr.split(":").map(Number);
+
+  if (ampm === "PM" && hours < 12) hours += 12;
+  if (ampm === "AM" && hours === 12) hours = 0;
+
+  const paddedHours = hours.toString().padStart(2, "0");
+  const paddedMinutes = minutes.toString().padStart(2, "0");
+  
+  // Asia/Kolkata is fixed at +05:30
+  const isoString = `${datePath}T${paddedHours}:${paddedMinutes}:00+05:30`;
+  const d = new Date(isoString);
+  
+  if (isNaN(d.getTime())) {
+    throw new Error(`Invalid Date created from ${isoString}`);
+  }
+  
   return d.toISOString();
 }
 
