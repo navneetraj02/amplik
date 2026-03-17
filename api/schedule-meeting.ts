@@ -122,8 +122,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       `New consultation booked.\n\n` +
       `Name: ${clientName || "Unknown"}\n` +
       `Email: ${clientEmail}\n` +
-      `When: ${whenString}\n` +
-      (summary ? `Summary: ${summary}\n` : "") +
+      `When: ${whenString}\n\n` +
+      `--- Chat Transcript ---\n` +
+      `${summary || "No chat history available"}\n\n` +
       (meetLink ? `Meet link: ${meetLink}\n` : "") +
       `\n— Amplik bot`;
 

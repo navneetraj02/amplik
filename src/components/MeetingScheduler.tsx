@@ -5,6 +5,7 @@ import { X, Calendar, Clock, CheckCircle2 } from "lucide-react";
 interface MeetingSchedulerProps {
   open: boolean;
   onClose: () => void;
+  messages?: any[];
 }
 
 const AVAILABLE_DATES = (() => {
@@ -25,7 +26,7 @@ const TIME_SLOTS = [
   "4:00 PM", "4:30 PM",
 ];
 
-export function MeetingScheduler({ open, onClose }: MeetingSchedulerProps) {
+export function MeetingScheduler({ open, onClose, messages = [] }: MeetingSchedulerProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
@@ -47,6 +48,10 @@ export function MeetingScheduler({ open, onClose }: MeetingSchedulerProps) {
         return;
       }
 
+      const transcript = messages
+        .map((m) => `${m.role === "ai" ? "AI" : "Client"}: ${m.content}`)
+        .join("\n\n");
+
       const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -55,7 +60,7 @@ export function MeetingScheduler({ open, onClose }: MeetingSchedulerProps) {
           time: selectedTime,
           clientName,
           clientEmail,
-          summary: "",
+          summary: transcript,
         }),
       });
 

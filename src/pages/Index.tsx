@@ -43,7 +43,11 @@ const Index = () => {
           onNewChat={createConversation}
         />
       </div>
-      <MeetingScheduler open={showScheduler} onClose={() => setShowScheduler(false)} />
+      <MeetingScheduler 
+        open={showScheduler} 
+        onClose={() => setShowScheduler(false)} 
+        messages={activeConversation?.messages} 
+      />
     </div>
   );
 };
