@@ -1,4 +1,4 @@
-import { NowRequest, NowResponse } from "@vercel/node";
+import { VercelRequest, VercelResponse } from "@vercel/node";
 import { google } from "googleapis";
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
@@ -13,7 +13,7 @@ function buildDateTime(date: string, time: string, timeZone: string) {
   return d.toISOString();
 }
 
-export default async function handler(req: NowRequest, res: NowResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "OPTIONS") {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
