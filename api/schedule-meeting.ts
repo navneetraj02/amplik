@@ -1,11 +1,15 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import { google } from "googleapis";
+import Groq from "groq-sdk";
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || "";
 const REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN || "";
 const CALENDAR_ID = process.env.GOOGLE_CALENDAR_ID || "";
 const TEAM_EMAIL = process.env.TEAM_EMAIL || "";
+const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
+
+const groq = new Groq({ apiKey: GROQ_API_KEY });
 
 function buildDateTime(datePath: string, timePath: string, _timeZone: string) {
   // datePath is YYYY-MM-DD (from toISOString().slice(0,10))
@@ -67,6 +71,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const startDateTime = buildDateTime(date, time, timeZone);
     const endDateTime = new Date(new Date(startDateTime).getTime() + 30 * 60 * 1000).toISOString();
 
+    // Generate AI Summary of the chat
+    let aiSummary = "No chat history available";
+    if (summary && GROQ_API_KEY) {
+      try {
+        const completion = await groq.chat.completions.create({
+          messages: [
+            {
+              role: "system",
+              content: "You are a professional business assistant. Summarize the following chat transcript into a concise 'Client Brief'. Include the client's goals, any mentioned budget/pricing, and the project timeline. Keep it structured with bullet points. Be professional and brief."
+            },
+            {
+              role: "user",
+              content: `Summarize this chat for the team:\n\n${summary}`
+            }
+          ],
+          model: "llama-3.3-70b-versatile",
+          temperature: 0.5,
+        });
+        aiSummary = completion.choices[0]?.message?.content || "Could not generate summary.";
+      } catch (err) {
+        console.error("Summarization error:", err);
+        aiSummary = "Error generating AI summary. Please refer to full transcript.";
+      }
+    }
+
     const eventSummary = `Amplik consultation – ${clientName || "New client"}`;
 
     const event = {
@@ -83,7 +112,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           conferenceSolutionKey: { type: "hangoutsMeet" },
         },
       },
-      description: summary || "",
+      description: `Consultation Brief:\n${aiSummary}\n\nClient Email: ${clientEmail}`,
     };
 
     const calendarResponse = await calendar.events.insert({
@@ -123,7 +152,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       `Name: ${clientName || "Unknown"}\n` +
       `Email: ${clientEmail}\n` +
       `When: ${whenString}\n\n` +
-      `--- Chat Transcript ---\n` +
+      `--- Consultation Brief (AI Summary) ---\n` +
+      `${aiSummary}\n\n` +
+      `----------------------------------------\n` +
+      `Full Chat Transcript:\n` +
       `${summary || "No chat history available"}\n\n` +
       (meetLink ? `Meet link: ${meetLink}\n` : "") +
       `\n— Amplik bot`;
