@@ -6,7 +6,9 @@ const CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || "";
 const REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN || "";
 const CALENDAR_ID = process.env.GOOGLE_CALENDAR_ID || "";
-const TEAM_EMAIL = process.env.TEAM_EMAIL || "";
+const TEAM_EMAIL_CONFIG = process.env.TEAM_EMAIL || ""; // Can be comma-separated
+const TEAM_EMAILS = TEAM_EMAIL_CONFIG.split(",").map(e => e.trim()).filter(e => e !== "");
+const PRIMARY_TEAM_EMAIL = TEAM_EMAILS[0] || ""; // Used for "From" address and primary calendar
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
 
 const groq = new Groq({ apiKey: GROQ_API_KEY });
@@ -57,7 +59,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: "Missing date, time, or clientEmail" });
     }
 
-    if (!CLIENT_ID || !CLIENT_SECRET || !REFRESH_TOKEN || !CALENDAR_ID || !TEAM_EMAIL) {
+    if (!CLIENT_ID || !CLIENT_SECRET || !REFRESH_TOKEN || !CALENDAR_ID || PRIMARY_TEAM_EMAIL === "") {
       return res.status(500).json({ error: "Missing Google/Vercel env config" });
     }
 
@@ -104,7 +106,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       end: { dateTime: endDateTime, timeZone },
       attendees: [
         { email: clientEmail },
-        { email: TEAM_EMAIL },
+        ...TEAM_EMAILS.map(email => ({ email })),
       ],
       conferenceData: {
         createRequest: {
@@ -136,7 +138,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const whenString = `${date} at ${time} (${timeZone})`;
-    const fromEmail = TEAM_EMAIL;
+    const fromEmail = PRIMARY_TEAM_EMAIL;
 
     const subjectClient = "Your Amplik consultation is scheduled";
     const bodyClient =
@@ -180,10 +182,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       requestBody: { raw: buildEmail(fromEmail, clientEmail, subjectClient, bodyClient) },
     });
 
-    await gmail.users.messages.send({
-      userId: "me",
-      requestBody: { raw: buildEmail(fromEmail, TEAM_EMAIL, subjectTeam, bodyTeam) },
-    });
+    for (const teamEmail of TEAM_EMAILS) {
+      await gmail.users.messages.send({
+        userId: "me",
+        requestBody: { raw: buildEmail(fromEmail, teamEmail, subjectTeam, bodyTeam) },
+      });
+    }
 
     return res.status(200).json({
       success: true,
